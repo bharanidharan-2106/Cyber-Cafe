@@ -1,29 +1,31 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import { useAuthModal } from "../context/AuthModalContext";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
+  const { openLogin } = useAuthModal();
   const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
 
   useEffect(() => {
-    // Check if user is logged in and is not admin
-    const userDetails = localStorage.getItem('userDetails');
-    if (!userDetails) {
-      navigate('/login');
+    const details = localStorage.getItem('userDetails');
+    if (!details) {
+      openLogin();
+      navigate('/');
       return;
     }
 
-    const user = JSON.parse(userDetails);
+    const user = JSON.parse(details);
     if (user.role === 'admin') {
       navigate('/admin-dashboard');
-      return;
     }
-  }, [navigate]);
+  }, [navigate, openLogin]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    localStorage.removeItem("userDetails");
+    navigate("/");
   };
 
   return (

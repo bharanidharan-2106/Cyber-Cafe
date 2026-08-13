@@ -1,24 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuthModal } from "../context/AuthModalContext";
 import "../styles/navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { openLogin, openRegister } = useAuthModal();
   const token = localStorage.getItem("token");
   const isAdminDashboard = location.pathname === "/admin-dashboard";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userDetails");
     navigate("/");
   };
-
-  if (location.pathname === "/login" || location.pathname === "/register") {
-    return null;
-  }
 
   return (
     <nav className="navbar">
@@ -28,27 +25,27 @@ const Navbar = () => {
           <span>Cyber Cafe</span>
         </Link>
 
-        <button 
+        <button
           className="mobile-menu-button"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+          <i className={`fas ${isMobileMenuOpen ? "fa-times" : "fa-bars"}`}></i>
         </button>
 
-        <ul className={isMobileMenuOpen ? 'show' : ''}>
-          {location.pathname === '/' ? (
+        <ul className={isMobileMenuOpen ? "show" : ""}>
+          {location.pathname === "/" ? (
             <>
               <li>
-                <Link to="/login" className="nav-link">
+                <button type="button" className="nav-link" onClick={openLogin}>
                   <i className="fas fa-sign-in-alt"></i>
                   Login
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/register" className="nav-link">
+                <button type="button" className="nav-link" onClick={openRegister}>
                   <i className="fas fa-user-plus"></i>
                   Register
-                </Link>
+                </button>
               </li>
             </>
           ) : isAdminDashboard ? (
@@ -64,25 +61,25 @@ const Navbar = () => {
           ) : token ? (
             <>
               <li>
-                <Link to="/user-dashboard" className={location.pathname === '/user-dashboard' ? 'active' : ''}>
+                <Link to="/user-dashboard" className={location.pathname === "/user-dashboard" ? "active" : ""}>
                   <i className="fas fa-home"></i>
                   Dashboard
                 </Link>
               </li>
               <li>
-                <Link to="/book-computer" className={location.pathname === '/book-computer' ? 'active' : ''}>
+                <Link to="/book-computer" className={location.pathname === "/book-computer" ? "active" : ""}>
                   <i className="fas fa-desktop"></i>
                   Book Computer
                 </Link>
               </li>
               <li>
-                <Link to="/printer-services" className={location.pathname === '/printer-services' ? 'active' : ''}>
+                <Link to="/printer-services" className={location.pathname === "/printer-services" ? "active" : ""}>
                   <i className="fas fa-print"></i>
                   Printer Services
                 </Link>
               </li>
               <li>
-                <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>
+                <Link to="/profile" className={location.pathname === "/profile" ? "active" : ""}>
                   <i className="fas fa-user"></i>
                   Profile
                 </Link>

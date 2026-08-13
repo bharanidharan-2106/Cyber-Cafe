@@ -1,24 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { useAuthModal } from '../context/AuthModalContext';
 
 const Home = () => {
+  const { openLogin, openRegister } = useAuthModal();
+
   return (
     <div className="layout-container">
       <main className="main-content">
-        {/* Hero Section */}
         <section className="hero-section">
           <div className="hero-content">
             <h1>Welcome to Our Cyber Cafe</h1>
             <p>Your one-stop destination for all your computing needs</p>
             <div className="hero-buttons">
-              <Link to="/login" className="primary-button">Login</Link>
-              <Link to="/register" className="secondary-button">Register</Link>
+              <button type="button" className="primary-button" onClick={openLogin}>Login</button>
+              <button type="button" className="secondary-button" onClick={openRegister}>Register</button>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
         <section className="features-section">
           <h2>Our Features</h2>
           <div className="features-grid">
@@ -45,7 +45,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Pricing Section */}
         <section className="pricing-section">
           <h2>Our Pricing</h2>
           <div className="pricing-grid">
@@ -79,7 +78,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Contact Section */}
         <section className="contact-section">
           <h2>Visit Us</h2>
           <div className="contact-info">
@@ -106,4 +104,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;

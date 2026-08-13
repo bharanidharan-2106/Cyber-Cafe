@@ -12,6 +12,7 @@ A full-stack web application built with the **MERN stack** (MongoDB, Express.js,
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
+- [Docker Deployment](#docker-deployment)
 - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
 - [Default Test Accounts](#default-test-accounts)
@@ -128,6 +129,14 @@ Session expires → terminal auto-released
 | CORS | Cross-origin resource sharing |
 | dotenv | Environment configuration |
 
+### DevOps
+
+| Technology | Purpose |
+| --- | --- |
+| Docker | Container runtime for backend, frontend, and MongoDB |
+| Docker Compose | Multi-container orchestration |
+| nginx | Serves the React production build and proxies `/api` to the backend |
+
 ### Architecture
 
 - **MVC pattern** on the backend — models, controllers, and routes are separated
@@ -162,16 +171,19 @@ cyber-cafe-management/
 │   │   └── systemRoutes.js       # Public system routes
 │   ├── server.js                 # Application entry point
 │   ├── setup.js                  # Seed script for test users
+│   ├── Dockerfile                # Backend container image
+│   ├── .dockerignore
 │   └── package.json
 │
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── components/           # Navbar, Header, Footer
+│   │   ├── components/           # Navbar, modals, Footer
+│   │   ├── context/              # Auth modal state
 │   │   ├── pages/
-│   │   │   ├── Home.js             # Landing page
-│   │   │   ├── Login.js            # User & admin login
-│   │   │   ├── Register.js         # User registration
+│   │   │   ├── Home.js             # Landing page with login/register modals
+│   │   │   ├── Login.js            # Redirects to home login modal
+│   │   │   ├── Register.js         # Redirects to home register modal
 │   │   │   ├── UserDashboard.js    # User service hub
 │   │   │   ├── AdminDashboard.js   # Admin control panel
 │   │   │   ├── BookComputer.js     # Terminal booking
@@ -180,8 +192,13 @@ cyber-cafe-management/
 │   │   ├── styles/                 # CSS stylesheets
 │   │   ├── App.js                  # Route definitions
 │   │   └── index.js
+│   ├── Dockerfile                # Multi-stage build (React → nginx)
+│   ├── nginx.conf                # Static serving + API reverse proxy
+│   ├── .dockerignore
 │   └── package.json
 │
+├── docker-compose.yml            # MongoDB + backend + frontend services
+├── .env.example                  # Sample env vars for Docker Compose
 ├── .gitignore
 └── README.md
 ```
@@ -255,6 +272,103 @@ npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Docker Deployment
+
+The project is fully containerized with **Docker Compose**, running three services: **MongoDB**, **backend (Express)**, and **frontend (React + nginx)**.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+
+### Quick Start
+
+From the project root:
+
+```bash
+# Copy and optionally edit environment variables
+cp .env.example .env
+
+# Build and start all services
+docker compose up --build
+```
+
+### Service URLs
+
+| Service | URL | Description |
+| --- | --- | --- |
+| Frontend | [http://localhost:3000](http://localhost:3000) | React app served by nginx |
+| Backend API | [http://localhost:5000/api](http://localhost:5000/api) | Express REST API |
+| MongoDB | `localhost:27017` | Database (persisted via Docker volume) |
+
+### Container Architecture
+
+```
+Browser
+   │
+   ▼
+localhost:3000  ──►  frontend (nginx)
+                          │
+                          ├── serves React static build
+                          └── proxies /api/* ──► backend:5000
+                                                    │
+                                                    ▼
+                                              mongodb:27017
+```
+
+### Docker Files
+
+| File | Purpose |
+| --- | --- |
+| `docker-compose.yml` | Defines MongoDB, backend, and frontend services |
+| `backend/Dockerfile` | Node 20 Alpine image for the API server |
+| `frontend/Dockerfile` | Multi-stage build: React build → nginx Alpine |
+| `frontend/nginx.conf` | Serves the SPA and reverse-proxies `/api` to the backend |
+| `.env.example` | Sample `JWT_SECRET` for Docker Compose |
+
+### Useful Docker Commands
+
+**Seed test users** (after containers are running):
+
+```bash
+docker compose exec backend node setup.js
+```
+
+**Run in detached mode:**
+
+```bash
+docker compose up --build -d
+```
+
+**View logs:**
+
+```bash
+docker compose logs -f
+```
+
+**Stop containers:**
+
+```bash
+docker compose down
+```
+
+**Stop and remove database volume:**
+
+```bash
+docker compose down -v
+```
+
+### Environment Variables (Docker)
+
+Docker Compose sets `MONGO_URI` and `PORT` automatically. Copy `.env.example` to `.env` at the project root to configure:
+
+```env
+JWT_SECRET=your_super_secret_jwt_key
+```
+
+The backend container reads `JWT_SECRET` from this file via Docker Compose.
 
 ---
 
@@ -334,6 +448,7 @@ After running `node setup.js`:
 - CRUD operations on terminals and user records
 - Revenue tracking from booking and print service history
 - Component-based React UI with protected route navigation
+- Dockerized deployment with Docker Compose for local and production-like environments
 
 ---
 
@@ -342,7 +457,7 @@ After running `node setup.js`:
 - Online payment gateway integration
 - Full backend persistence for terminal booking and print jobs
 - Email notifications for booking confirmations
-- Cloud deployment (AWS / Render / Vercel)
+- Cloud deployment with Docker images (AWS ECS, Render, Railway)
 
 ---
 

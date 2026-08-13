@@ -1,0 +1,34 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: cyber-cafe-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./backend
+    container_name: cyber-cafe-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/cyber-cafe
+      JWT_SECRET: ${JWT_SECRET:-change_this_jwt_secret_in_production}
+      PORT: 5000
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    container_name: cyber-cafe-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:

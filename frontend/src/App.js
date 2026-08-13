@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthModalProvider, useAuthModal } from "./context/AuthModalContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -9,10 +10,14 @@ import PrinterServices from "./pages/PrinterServices";
 import Navbar from "./components/Navbar";
 import BookComputer from "./pages/BookComputer";
 import Home from "./pages/Home";
+import LoginModal from "./components/LoginModal";
+import RegisterModal from "./components/RegisterModal";
 
-function App() {
+const AppRoutes = () => {
+  const { activeModal } = useAuthModal();
+
   return (
-    <div className="app-container">
+    <>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -23,7 +28,20 @@ function App() {
         <Route path="/book-computer" element={<BookComputer />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/printer-services" element={<PrinterServices />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {activeModal === "login" && <LoginModal />}
+      {activeModal === "register" && <RegisterModal />}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <div className="app-container">
+      <AuthModalProvider>
+        <AppRoutes />
+      </AuthModalProvider>
     </div>
   );
 }

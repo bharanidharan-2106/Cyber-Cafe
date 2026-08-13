@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { useAuthModal } from '../context/AuthModalContext';
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState(null);
   const navigate = useNavigate();
+  const { openLogin } = useAuthModal();
 
   useEffect(() => {
-    // Get user details from localStorage
     const details = localStorage.getItem('userDetails');
     if (!details) {
-      navigate('/login');
+      openLogin();
+      navigate('/');
       return;
     }
 
     const parsedDetails = JSON.parse(details);
     setUserDetails(parsedDetails);
     setEditedDetails(parsedDetails);
-  }, [navigate]);
+  }, [navigate, openLogin]);
 
   const handleEdit = () => {
     setIsEditing(true);

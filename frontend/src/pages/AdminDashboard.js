@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
+import TerminalFormModal from '../components/TerminalFormModal';
+import { useAuthModal } from '../context/AuthModalContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { openLogin } = useAuthModal();
   const [showAddTerminalForm, setShowAddTerminalForm] = useState(false);
   const [showEditTerminalForm, setShowEditTerminalForm] = useState(false);
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
@@ -20,7 +22,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const userDetails = localStorage.getItem('userDetails');
     if (!userDetails) {
-      navigate('/login');
+      openLogin();
+      navigate('/');
       return;
     }
 
@@ -34,7 +37,7 @@ const AdminDashboard = () => {
 
     const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
-  }, [navigate]);
+  }, [navigate, openLogin]);
 
   const loadData = () => {
     const savedTerminals = localStorage.getItem('terminals');
@@ -96,7 +99,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const newTerminal = {
-      id: terminals.length + 1,
+      id: terminals.length ? Math.max(...terminals.map(t => t.id)) + 1 : 1,
       type: formData.get('type'),
       name: formData.get('name'),
       specs: formData.get('specs'),
@@ -256,104 +259,23 @@ const AdminDashboard = () => {
             </div>
 
             {showAddTerminalForm && (
-              <div className="modal-overlay">
-                <div className="modal-content">
-                  <h3>Add New Terminal</h3>
-                  <form onSubmit={handleAddTerminal}>
-                    <div className="form-group">
-                      <label>Terminal Type</label>
-                      <select name="type" required>
-                        <option value="gaming">Gaming</option>
-                        <option value="academic">Academic</option>
-                        <option value="browsing">Browsing</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Terminal Name</label>
-                      <input type="text" name="name" required placeholder="e.g., Gaming Terminal 1" />
-                    </div>
-                    <div className="form-group">
-                      <label>Specifications</label>
-                      <textarea name="specs" required placeholder="Enter terminal specifications"></textarea>
-                    </div>
-                    <div className="form-group">
-                      <label>Price per Hour (₹)</label>
-                      <input type="number" name="price" required min="1" placeholder="e.g., 50" />
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="confirm-button">Add Terminal</button>
-                      <button 
-                        type="button" 
-                        className="cancel-button"
-                        onClick={() => setShowAddTerminalForm(false)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              <TerminalFormModal
+                mode="add"
+                onSubmit={handleAddTerminal}
+                onClose={() => setShowAddTerminalForm(false)}
+              />
             )}
 
             {showEditTerminalForm && editingTerminal && (
-              <div className="modal-overlay">
-                <div className="modal-content">
-                  <h3>Edit Terminal</h3>
-                  <form onSubmit={handleEditTerminal}>
-                    <div className="form-group">
-                      <label>Terminal Type</label>
-                      <select name="type" required defaultValue={editingTerminal.type}>
-                        <option value="gaming">Gaming</option>
-                        <option value="academic">Academic</option>
-                        <option value="browsing">Browsing</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Terminal Name</label>
-                      <input 
-                        type="text" 
-                        name="name" 
-                        required 
-                        defaultValue={editingTerminal.name}
-                        placeholder="e.g., Gaming Terminal 1" 
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Specifications</label>
-                      <textarea 
-                        name="specs" 
-                        required 
-                        defaultValue={editingTerminal.specs}
-                        placeholder="Enter terminal specifications"
-                      ></textarea>
-                    </div>
-                    <div className="form-group">
-                      <label>Price per Hour (₹)</label>
-                      <input 
-                        type="number" 
-                        name="price" 
-                        required 
-                        min="1" 
-                        defaultValue={editingTerminal.price}
-                        placeholder="e.g., 50" 
-                      />
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="confirm-button">Save Changes</button>
-                      <button 
-                        type="button" 
-                        className="cancel-button"
-                        onClick={() => {
-                          setShowEditTerminalForm(false);
-                          setEditingTerminal(null);
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              <TerminalFormModal
+                mode="edit"
+                terminal={editingTerminal}
+                onSubmit={handleEditTerminal}
+                onClose={() => {
+                  setShowEditTerminalForm(false);
+                  setEditingTerminal(null);
+                }}
+              />
             )}
 
             <div className="terminals-grid">
