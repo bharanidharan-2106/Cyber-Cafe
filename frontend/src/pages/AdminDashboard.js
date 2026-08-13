@@ -18,7 +18,6 @@ const AdminDashboard = () => {
   const [expandedUser, setExpandedUser] = useState(null);
   
   useEffect(() => {
-    // Check admin authentication
     const userDetails = localStorage.getItem('userDetails');
     if (!userDetails) {
       navigate('/login');
@@ -31,20 +30,16 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Load data from localStorage
     loadData();
 
-    // Set up interval to refresh data
     const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
   }, [navigate]);
 
   const loadData = () => {
-    // Load terminals
     const savedTerminals = localStorage.getItem('terminals');
     if (savedTerminals) {
       const allTerminals = JSON.parse(savedTerminals);
-      // Check for expired sessions
       const currentTime = new Date().getTime();
       const updatedTerminals = allTerminals.map(terminal => {
         if (terminal.status === 'occupied' && terminal.sessionEndTime) {
@@ -66,20 +61,17 @@ const AdminDashboard = () => {
       localStorage.setItem('terminals', JSON.stringify(updatedTerminals));
     }
 
-    // Load registered users and sort by last activity (newest first)
     const registeredUsers = localStorage.getItem('registeredUsers');
     if (registeredUsers) {
       const parsedUsers = JSON.parse(registeredUsers);
-      // Sort users by registration date (newest first)
       const sortedUsers = parsedUsers.sort((a, b) => {
         const dateA = new Date(a.registrationDate || a.dateOfBirth || 0);
         const dateB = new Date(b.registrationDate || b.dateOfBirth || 0);
-        return dateB - dateA; // This ensures newest users appear first
+        return dateB - dateA; 
       });
       setUsers(sortedUsers);
     }
 
-    // Load user history
     const savedHistory = localStorage.getItem('userHistory');
     if (savedHistory) {
       const history = JSON.parse(savedHistory);
@@ -137,13 +129,8 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTerminal = (id) => {
-    // Filter out the terminal to be deleted
     const updatedTerminals = terminals.filter(terminal => terminal.id !== id);
-    
-    // Update localStorage with the new terminals array
     localStorage.setItem('terminals', JSON.stringify(updatedTerminals));
-    
-    // Update the state with the new terminals array
     setTerminals(updatedTerminals);
   };
 
@@ -190,20 +177,16 @@ const AdminDashboard = () => {
   };
 
   const confirmDeleteUser = () => {
-    // Get all storage items that might contain user data
     const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const userHistory = JSON.parse(localStorage.getItem('userHistory') || '[]');
     const terminals = JSON.parse(localStorage.getItem('terminals') || '[]');
 
-    // Remove user from registeredUsers
     const updatedUsers = registeredUsers.filter(u => u.username !== userToDelete.username);
     localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
-    // Remove user's history
     const updatedHistory = userHistory.filter(h => h.username !== userToDelete.username);
     localStorage.setItem('userHistory', JSON.stringify(updatedHistory));
 
-    // Free up any terminals occupied by the user
     const updatedTerminals = terminals.map(terminal => {
       if (terminal.currentUser === userToDelete.username) {
         return {
@@ -219,7 +202,6 @@ const AdminDashboard = () => {
     });
     localStorage.setItem('terminals', JSON.stringify(updatedTerminals));
 
-    // Update state
     setUsers(updatedUsers);
     setUserHistory(updatedHistory);
     setTerminals(updatedTerminals);

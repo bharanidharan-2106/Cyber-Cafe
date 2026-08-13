@@ -27,20 +27,16 @@ const Login = () => {
         navigate("/admin-dashboard");
         return;
       }
-
-      // Login request using axios
       const loginResponse = await axios.post("http://localhost:5000/api/auth/login", {
         username,
         password
       });
 
       if (loginResponse.data) {
-        // Get stored user details from registration
         const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
         const currentUser = registeredUsers.find(user => user.username === username);
 
         if (currentUser) {
-          // Store complete user details
           const userDetails = {
             username: currentUser.username,
             email: currentUser.email,
@@ -52,7 +48,6 @@ const Login = () => {
           localStorage.setItem('token', loginResponse.data.token);
           localStorage.setItem('userDetails', JSON.stringify(userDetails));
         } else {
-          // Fallback if user details not found
           localStorage.setItem('token', loginResponse.data.token);
           localStorage.setItem('userDetails', JSON.stringify({
             username: username,
@@ -82,36 +77,29 @@ const Login = () => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       
-      // Create user object from Google data
       const googleUser = {
         username: decoded.name,
         email: decoded.email,
-        // You can add more fields as needed
         googleId: decoded.sub,
         role: 'user',
         registrationDate: new Date().toISOString(),
         lastActivity: new Date().toISOString()
       };
 
-      // Get existing users
       const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
       
-      // Check if user already exists
       const existingUser = existingUsers.find(user => user.email === decoded.email);
       
       if (existingUser) {
-        // Update existing user's last activity
         existingUser.lastActivity = new Date().toISOString();
         localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
         localStorage.setItem('userDetails', JSON.stringify(existingUser));
       } else {
-        // Add new user
         existingUsers.push(googleUser);
         localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
         localStorage.setItem('userDetails', JSON.stringify(googleUser));
       }
 
-      // Redirect based on role
       navigate(googleUser.role === 'admin' ? '/admin-dashboard' : '/user-dashboard');
     } catch (error) {
       setError('Failed to login with Google. Please try again.');

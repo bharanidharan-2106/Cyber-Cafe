@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import connectDB from './config/db.js';
 import User from './models/User.js';
 import dotenv from 'dotenv';
 
@@ -7,8 +8,7 @@ dotenv.config();
 
 const createTestUsers = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    await connectDB();
 
     // Create admin user
     const adminPassword = await bcrypt.hash('admin123', 10);

@@ -13,10 +13,9 @@ const BookComputer = () => {
 
   useEffect(() => {
     loadTerminals();
-    // Check for expired sessions every second
     const interval = setInterval(() => {
       checkExpiredSessions();
-      setTerminals(prevTerminals => [...prevTerminals]); // Force re-render to update times
+      setTerminals(prevTerminals => [...prevTerminals]); 
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -25,7 +24,6 @@ const BookComputer = () => {
     const savedTerminals = localStorage.getItem('terminals');
     if (savedTerminals) {
       const allTerminals = JSON.parse(savedTerminals);
-      // Check for expired sessions when loading
       const currentTime = new Date().getTime();
       const updatedTerminals = allTerminals.map(terminal => {
         if (terminal.status === 'occupied' && terminal.sessionEndTime) {
@@ -48,7 +46,6 @@ const BookComputer = () => {
     }
   };
 
-  // Function to check and release expired terminals
   const checkExpiredSessions = () => {
     const currentTime = new Date().getTime();
     let hasChanges = false;
@@ -58,7 +55,6 @@ const BookComputer = () => {
         const endTime = new Date(terminal.sessionEndTime).getTime();
         if (currentTime >= endTime) {
           hasChanges = true;
-          // Add to history before releasing
           const history = JSON.parse(localStorage.getItem('userHistory') || '[]');
           history.push({
             username: terminal.currentUser,
@@ -70,7 +66,6 @@ const BookComputer = () => {
           });
           localStorage.setItem('userHistory', JSON.stringify(history));
           
-          // Release the terminal
           return {
             ...terminal,
             status: 'available',
@@ -127,7 +122,6 @@ const BookComputer = () => {
     
     const username = JSON.parse(localStorage.getItem('userDetails'))?.username;
     
-    // Check if user already has an active session
     const userHasActiveSession = terminals.some(t => 
       t.status === 'occupied' && t.currentUser === username
     );
@@ -137,18 +131,15 @@ const BookComputer = () => {
       return;
     }
 
-    // Find available terminal of requested type
     const availableTerminal = terminals.find(t => 
       t.type === requestDetails.type && t.status === 'available'
     );
 
     if (availableTerminal) {
-      // Calculate session end time
       const startTime = new Date();
       const durationInHours = parseFloat(duration);
       const endTime = new Date(startTime.getTime() + (durationInHours * 60 * 60 * 1000));
 
-      // Calculate price (half price for 30 minutes)
       const price = durationInHours === 0.5 ? availableTerminal.price / 2 : availableTerminal.price * durationInHours;
 
       const updatedTerminals = terminals.map(t => 
@@ -162,11 +153,9 @@ const BookComputer = () => {
         } : t
       );
 
-      // Update terminals in localStorage and state
       localStorage.setItem('terminals', JSON.stringify(updatedTerminals));
       setTerminals(updatedTerminals);
 
-      // Add to user history
       const bookingDetails = {
         username: username,
         service: `${availableTerminal.name} (${availableTerminal.type})`,
@@ -180,7 +169,6 @@ const BookComputer = () => {
       history.push(bookingDetails);
       localStorage.setItem('userHistory', JSON.stringify(history));
 
-      // Update user's last activity
       const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
       const updatedUsers = registeredUsers.map(user => 
         user.username === username 
@@ -193,7 +181,6 @@ const BookComputer = () => {
       setRequestDetails({ type: '', requirements: '' });
       setDuration('1');
     } else {
-      // Find occupied terminals of the requested type to show their availability time
       const occupiedTerminals = terminals.filter(t => 
         t.type === requestDetails.type && t.status === 'occupied'
       );

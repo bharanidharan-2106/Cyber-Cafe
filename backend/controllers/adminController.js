@@ -2,7 +2,6 @@ import System from '../models/System.js';
 import User from '../models/User.js';
 import Booking from '../models/Booking.js';
 
-// Add System Terminal
 export const addSystem = async (req, res) => {
   try {
     const { name, type, specifications } = req.body;
@@ -18,7 +17,6 @@ export const addSystem = async (req, res) => {
   }
 };
 
-// Get Available Systems
 export const viewAvailableSystems = async (req, res) => {
   try {
     const systems = await System.find({ status: 'available' });
@@ -28,7 +26,6 @@ export const viewAvailableSystems = async (req, res) => {
   }
 };
 
-// Remove System Terminal
 const removeSystem = async (req, res) => {
   const system = await System.findById(req.params.id);
   if (system) {
@@ -39,7 +36,6 @@ const removeSystem = async (req, res) => {
   }
 };
 
-// Get All Users
 export const viewLoggedInUsers = async (req, res) => {
   try {
     const users = await User.find({})
@@ -51,7 +47,6 @@ export const viewLoggedInUsers = async (req, res) => {
   }
 };
 
-// Get All Bookings
 const getBookings = async (req, res) => {
   const bookings = await Booking.find({}).populate('user', 'name email');
   res.json(bookings);
